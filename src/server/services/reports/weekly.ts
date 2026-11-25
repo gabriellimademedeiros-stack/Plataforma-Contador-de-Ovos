@@ -4,7 +4,8 @@ import { getSql } from "@/db/client";
 import { addDays } from "@/lib/dates";
 import { fmtBRL, fmtInt, fmtNumber } from "@/lib/format";
 import { HOUSE_COLORS } from "@/lib/colors";
-import { DEFAULT_TARGETS } from "@/engine/standards/targets";
+import type { TargetDef } from "@/engine/standards/targets";
+import { getTargets } from "@/server/repositories/config";
 import { KNOWLEDGE_BASE } from "@/engine/causes/knowledge-base";
 import { RANK_COMPONENTS } from "@/engine/ranking/houses";
 import { whatChanged } from "@/engine/text/report";
@@ -15,7 +16,7 @@ import type { ChartSpec } from "@/components/charts/types";
 import type { RBlock, ReportModel, RPage, RRow } from "@/components/reports/types";
 import { c, delta, dm, dmy, loadWeek, num, targetTone, type WeekCtx } from "./common";
 
-const T = (m: string) => DEFAULT_TARGETS.find((t) => t.metricCode === m);
+type TF = (m: string) => TargetDef | undefined;
 const SEV_RANK: Record<string, number> = { critica: 0, alta: 1, media: 2, aviso: 3, baixa: 4 };
 const SEV_PT: Record<string, string> = { critica: "crítica", alta: "alta", media: "média", baixa: "baixa", aviso: "aviso" };
 const CONF_PT: Record<string, string> = { alta: "alta", media: "média", baixa: "baixa" };
@@ -81,7 +82,7 @@ function trendSpec(ctx: WeekCtx, metric: string, title: string, decimals: number
 }
 
 /** Tabela de defeitos (páginas 5 e 6): semana × anterior × média de 4 semanas, e pista quando houver diferença. */
-function defectBlocks(ctx: WeekCtx, pairs: Array<{ m: string; label: string; lane: string }>): RBlock[] {
+function defectBlocks(ctx: WeekCtx, pairs: Array<{ m: string; label: string; lane: string }>, T: TF): RBlock[] {
   const cols = ["Galpão"];
   for (const p of pairs) cols.push(`${p.label} semana`, "anterior", "média 4 sem.");
   cols.push("Por pista (quando difere)");
@@ -105,6 +106,8 @@ export async function buildWeeklyReport(scope: Scope, ws: string, scopeNote: str
   const ctx = await loadWeek(scope, ws);
   const sql = getSql();
   const we = addDays(ws, 6);
+  const targets = await getTargets();
+  const T: TF = (m) => targets.find((t) => t.metricCode === m && !t.phase) ?? targets.find((t) => t.metricCode === m);
   const fin = scope.canSeeFinance;
   const pages: RPage[] = [];
 
@@ -262,14 +265,14 @@ export async function buildWeeklyReport(scope: Scope, ws: string, scopeNote: str
     n: 5,
     title: "Avarias",
     subtitle: "Trincados e quebrados por galpão",
-    blocks: [...defectBlocks(ctx, [{ m: "qual.trincados", label: "Trincados", lane: "qual.avarias" }, { m: "qual.quebrados", label: "Quebrados", lane: "qual.quebrados" }]), { type: "chart", spec: trendSpec(ctx, "qual.avarias", "Avarias (%) — tendência de 8 semanas", 2), height: 185 }],
+    blocks: [...defectBlocks(ctx, [{ m: "qual.trincados", label: "Trincados", lane: "qual.avarias" }, { m: "qual.quebrados", label: "Quebrados", lane: "qual.quebrados" }], T), { type: "chart", spec: trendSpec(ctx, "qual.avarias", "Avarias (%) — tendência de 8 semanas", 2), height: 185 }],
   });
 
   // ---------------- 6. Sujos ----------------
   pages.push({
     n: 6,
     title: "Sujos de fezes e de sangue",
-    blocks: [...defectBlocks(ctx, [{ m: "qual.sujos_fezes", label: "Fezes", lane: "qual.sujos_fezes" }, { m: "qual.sujos_sangue", label: "Sangue", lane: "qual.sujos_sangue" }]), { type: "chart", spec: trendSpec(ctx, "qual.sujos", "Sujos (fezes + sangue, %) — tendência de 8 semanas", 2), height: 185 }],
+    blocks: [...defectBlocks(ctx, [{ m: "qual.sujos_fezes", label: "Fezes", lane: "qual.sujos_fezes" }, { m: "qual.sujos_sangue", label: "Sangue", lane: "qual.sujos_sangue" }], T), { type: "chart", spec: trendSpec(ctx, "qual.sujos", "Sujos (fezes + sangue, %) — tendência de 8 semanas", 2), height: 185 }],
   });
 
   // ---------------- 7. Ranking de galpões ----------------

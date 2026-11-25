@@ -77,6 +77,10 @@ export function alertTitle(rule: string, house: string | null, c: CondResult, ex
       return `Margem negativa do ${h} há ${extra.weeks ?? 3} semanas`;
     case "P01":
       return `Previsão de calor: ${nf(Number(extra.max))} °C em ${String(extra.date ?? "").slice(8, 10)}/${String(extra.date ?? "").slice(5, 7)}`;
+    case "A02":
+      return `Esteira sem fluxo no ${h}: nenhum ovo há ${nf(Number(x.minutesWithoutEggs), 0)} minutos`;
+    case "A08h":
+      return `Água do ${h} hoje em ${nf((Number(x.ratio) || 0) * 100, 0)}% do normal para o horário`;
     default:
       return `${RULE_BY_CODE[rule]?.name ?? rule} no ${h}`;
   }
@@ -88,7 +92,7 @@ function severityOf(rule: string, c: CondResult): string {
   return def?.severity ?? "media";
 }
 
-function makeAlert(rule: string, house: string | null, flock: string | null, first: string, d: string, c: CondResult, source: EngineAlert["source"], extra: Record<string, unknown> = {}): EngineAlert {
+export function makeAlert(rule: string, house: string | null, flock: string | null, first: string, d: string, c: CondResult, source: EngineAlert["source"], extra: Record<string, unknown> = {}): EngineAlert {
   const def = RULE_BY_CODE[rule];
   return {
     id: uuidFromName(`alert:${rule}:${house ?? "farm"}:${first}:${source}`),

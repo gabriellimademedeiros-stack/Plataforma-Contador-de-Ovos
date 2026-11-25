@@ -46,12 +46,16 @@ export function applyInternalDeviation(store: MetricStore, ds: Dataset, idx: Dat
   }
 }
 
-export function computeAllMetrics(ds: Dataset, opts: { strainRows?: StrainStandardRow[]; from?: string; to?: string } = {}): MetricsResult {
+/**
+ * `internalRows`: padrão interno já calculado (recálculo de uma janela curta usa o padrão gravado no banco,
+ * em vez de recalculá-lo com poucos dados).
+ */
+export function computeAllMetrics(ds: Dataset, opts: { strainRows?: StrainStandardRow[]; from?: string; to?: string; internalRows?: InternalStandardRow[] } = {}): MetricsResult {
   const idx = buildIndex(ds);
   const strainStd = new StrainStandards(opts.strainRows ?? defaultStrainStandardRows());
   const store = computeDailyMetrics({ ds, idx, strainStd, from: opts.from, to: opts.to });
   const weekly1 = computeWeekly(store, CATALOG_AGG);
-  const internalRows = computeInternalStandards(weekly1, ds.flocks, ds.events);
+  const internalRows = opts.internalRows ?? computeInternalStandards(weekly1, ds.flocks, ds.events);
   const internal = new InternalStandards(internalRows);
   applyInternalDeviation(store, ds, idx, internal, strainStd);
   const weekly = computeWeekly(store, CATALOG_AGG);

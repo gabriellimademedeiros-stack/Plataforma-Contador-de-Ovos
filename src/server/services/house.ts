@@ -516,7 +516,8 @@ export async function getHouseDevices(ctx: HouseCtx) {
   return rows.map((r) => ({
     code: r.code as string,
     type: r.type as string,
-    status: r.status as string,
+    // situação ao vivo: online até 2 minutos depois da última mensagem; depois, offline
+    status: r.last_seen_at ? (Date.now() - new Date(r.last_seen_at).getTime() <= 120_000 ? "online" : "offline") : (r.status as string),
     model: r.model_version as string | null,
     firmware: r.firmware as string | null,
     confidence: r.confidence_score == null ? null : Number(r.confidence_score),

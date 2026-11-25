@@ -10,13 +10,12 @@ import { HOUSE_COLORS } from "@/lib/colors";
 import { METRIC_ALIASES, METRIC_BY_CODE, METRICS, isFinanceMetric } from "@/engine/metrics/catalog";
 import { EVENT_TYPE_BY_CODE, EVENT_TYPES } from "@/engine/impacts/event-types";
 import { KNOWLEDGE_BASE, causeName } from "@/engine/causes/knowledge-base";
-import { DEFAULT_TARGETS } from "@/engine/standards/targets";
 import { simulatePrices } from "@/engine/finance/price-sim";
 import { mean, stdev } from "@/engine/stats";
 import { cosineMasked } from "@/engine/stats";
 import type { Scope } from "@/server/permissions";
 import { getFlocks, getHouses, getRefDate, currentFlockOf } from "@/server/repositories/reference";
-import { getStrainStandards, getInternalStandards } from "@/server/repositories/config";
+import { getStrainStandards, getInternalStandards, getTargets } from "@/server/repositories/config";
 import { listAlerts, listEvents } from "@/server/repositories/marks";
 import { readDaily, readWeekly, windowAggregate, aggregateCells, farmSeries, type DailyRow, type WeeklyRowQ } from "@/server/services/metrics-query";
 import { getCulling, getForecast, getPriceSimInputs, getStrainRanking } from "@/server/services/finance";
@@ -130,7 +129,7 @@ export async function consultarIndicador(ctx: ToolContext, i: z.infer<typeof con
         if (v == null) avisos.push("padrão interno insuficiente; usando a curva da linhagem");
         refs[h] = r(v ?? std.week(f.strainCode, metric, w), 2);
       } else {
-        const t = DEFAULT_TARGETS.find((x) => x.metricCode === metric);
+        const t = (await getTargets()).find((x) => x.metricCode === metric);
         refs[h] = t ? (t.greenMax ?? t.greenMin) : null;
       }
     }
@@ -495,7 +494,7 @@ export async function buscarConhecimento(ctx: ToolContext, i: z.infer<typeof bus
     ...GLOSSARY.map((g) => ({ fonte: "glossário", texto: `${g.termo}: ${g.significado}` })),
     ...METRICS.filter((m) => !m.internal && (!m.finance || ctx.scope.canSeeFinance)).map((m) => ({ fonte: "definição de métrica", texto: `${m.name} (${m.unit}): ${m.description}` })),
     ...KNOWLEDGE_BASE.map((h) => ({ fonte: "base de hipóteses", texto: `${h.name}: o que verificar — ${h.checks.join(", ")}` })),
-    ...DEFAULT_TARGETS.map((t) => ({ fonte: "metas", texto: `${t.label}: verde ${t.greenMin != null ? `≥ ${t.greenMin}` : `≤ ${t.greenMax}`}; amarelo ${t.yellowMin != null ? `≥ ${t.yellowMin}` : `≤ ${t.yellowMax}`}` })),
+    ...(await getTargets()).map((t) => ({ fonte: "metas", texto: `${t.label}: verde ${t.greenMin != null ? `≥ ${t.greenMin}` : `≤ ${t.greenMax}`}; amarelo ${t.yellowMin != null ? `≥ ${t.yellowMin}` : `≤ ${t.yellowMax}`}` })),
     ...mem.map((m) => ({ fonte: "memória da empresa", texto: m.text as string })),
   ];
   const found = items.map((x) => ({ ...x, s: score(x.texto) })).filter((x) => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 8).map(({ fonte, texto }) => ({ fonte, texto }));
