@@ -5,6 +5,8 @@ import { generateDataset } from "../../src/simulator/generate";
 import { eventRows, writeDataset } from "../../src/server/repositories/dataset-writer";
 import type { Dataset } from "../../src/engine/types";
 import { copyRows, insertBatched } from "./db-write";
+import { computeAndWriteMetrics } from "./metrics-step";
+import type { MetricsResult } from "../../src/engine/metrics/pipeline";
 
 export interface PipelineCtx {
   sql: ReturnType<typeof postgres>;
@@ -15,6 +17,7 @@ export interface PipelineCtx {
 
 export interface PipelineState {
   ds: Dataset;
+  metrics: MetricsResult;
 }
 
 /** Passos 4 a 12 do reset. */
@@ -38,8 +41,10 @@ export async function runPipelineAfterBase(ctx: PipelineCtx): Promise<PipelineSt
     return er.ev.length;
   });
 
+  const metrics = await step("6. Indicadores diários, semanais, da granja e padrões internos", () => computeAndWriteMetrics(sql, ds));
+
   await ins("system_state", [
     { key: "simulation", value: { seed: cal.seed, dStart: cal.dStart, anchorEnd: cal.dEnd, lastDay: ds.dEnd } },
   ]);
-  return { ds };
+  return { ds, metrics };
 }
