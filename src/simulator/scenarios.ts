@@ -39,9 +39,13 @@ export const SCENARIO_INTENSITY: Record<string, number> = {
   S2: 1,
   S3: 1,
   S4: 1,
+  /** intensidade só da rampa de trincados do S4 (ver docs/DECISOES.md) */
+  S4crack: 1,
   S5: 1,
   S6: 1,
-  S8: 1,
+  S8: 1.3,
+  /** intensidade só do aumento de água do S8 */
+  S8water: 1.9,
   S9: 1,
   H3: 0.9,
   H4: 1,
@@ -188,7 +192,7 @@ export function effectsFor(
   // S4 — carga de ração com cálcio baixo (grupo A)
   if (S4_HOUSES.includes(house) && r >= -21) {
     const m = s4CrackedMul(r);
-    const mi = sc(m, I.S4);
+    const mi = sc(m, I.S4crack);
     e.classMul.cracked = (e.classMul.cracked ?? 1) * mi;
     if (r <= 0) e.classMul.broken = (e.classMul.broken ?? 1) * sc(1 + ((m - 1) / 0.6) * 0.3, I.S4);
     if (r >= -18 && r <= -1) {
@@ -207,7 +211,7 @@ export function effectsFor(
   if (house === "P004" && r >= -4) {
     e.classMul.dirty_feces = (e.classMul.dirty_feces ?? 1) * sc(1.5, I.S8);
     e.laneShare1.dirty_feces = 0.5 + 0.2 * I.S8;
-    e.waterMul *= sc(1.09, I.S8);
+    e.waterMul *= sc(1.09, I.S8water);
     e.nh3Add += 5 * I.S8;
   }
 

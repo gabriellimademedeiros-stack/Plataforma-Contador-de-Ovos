@@ -103,5 +103,6 @@ export async function answerQuestion(scope: Scope, questionId: string, answerCod
   await sql`insert into app.notifications (tenant_id, user_id, alert_id, house_id, kind, title, body, link)
     values (${TENANT_ID}, null, ${q.alert_id}, ${houseIdFor(q.house)}, 'resposta', ${`Encarregado respondeu sobre o ${q.house}: ${opt.label}`}, 'As hipóteses do alerta foram recalculadas.', ${`/alertas/${q.alert_id}`})`;
   await audit(scope.user.id, "responder", "anomaly_questions", questionId, null, { answerCode, answerText });
+  // a resposta entra como sinal forte da hipótese correspondente
   await recomputeAlertInsights(q.alert_id);
 }

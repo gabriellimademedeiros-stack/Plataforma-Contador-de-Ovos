@@ -70,6 +70,8 @@ export async function createEvent(scope: Scope, input: EventInputT) {
   });
   await audit(scope.user.id, "criar", "events", id, null, { ...input, startsAt, endsAt });
   await recomputeEventImpact(id);
+  const { recomputeOpenAlertInsights } = await import("./alert-insights");
+  await recomputeOpenAlertInsights(input.houses);
   return id;
 }
 

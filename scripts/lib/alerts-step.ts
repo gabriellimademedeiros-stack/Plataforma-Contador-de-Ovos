@@ -25,7 +25,7 @@ export interface AlertsWorld {
   alertIncident: Map<string, string>;
   scenarios: ScenarioInfo[];
   states?: Map<string, AlertFinalState>;
-  hypotheses?: Map<string, { hypotheses: unknown[]; decomposition: unknown; similar: unknown[]; atOpening: unknown[]; whatToKnow: string[]; text: string }>;
+  hypotheses?: Map<string, { hypotheses: unknown[]; decomposition: unknown; similar: unknown[]; atOpening: unknown[]; whatToKnow: string[]; text: string; fingerprint?: (number | null)[] }>;
 }
 
 export function scenariosFor(ds: Dataset): ScenarioInfo[] {
@@ -56,7 +56,7 @@ export async function applyDemoStatesAndWrite(sql: Sql, ds: Dataset, w: AlertsWo
     const top = h?.find((x) => x.code === "estresse_termico" || x.code === "resfriamento_insuficiente");
     return top?.code ?? "estresse_termico";
   };
-  const states = new Map(w.alerts.map((a) => [a.id, demoStateFor(a, w.scenarios, dEnd, best)]));
+  const states = w.states ?? new Map(w.alerts.map((a) => [a.id, demoStateFor(a, w.scenarios, dEnd, best)]));
   w.states = states;
   const rows = w.alerts.map((a) => {
     const row = alertRow(a, states.get(a.id), w.alertIncident.get(a.id) ?? null);
@@ -65,7 +65,7 @@ export async function applyDemoStatesAndWrite(sql: Sql, ds: Dataset, w: AlertsWo
       row.hypotheses = h.hypotheses;
       row.decomposition = h.decomposition;
       row.similar_cases = h.similar;
-      row.evidence = { ...(row.evidence as object), hypotheses_at_opening: h.atOpening, what_to_know: h.whatToKnow, explanation: h.text };
+      row.evidence = { ...(row.evidence as object), hypotheses_at_opening: h.atOpening, what_to_know: h.whatToKnow, explanation: h.text, fingerprint: h.fingerprint };
     }
     return row;
   });

@@ -8,7 +8,7 @@ let cache: { ds: Dataset; m: MetricsResult } | null = null;
 
 export function world() {
   if (!cache) {
-    const ds = generateDataset({ seed: 20261125, dEnd: D_END, skipHourly: true });
+    const ds = generateDataset({ seed: 20261125, dEnd: D_END });
     cache = { ds, m: computeAllMetrics(ds) };
   }
   return cache;
