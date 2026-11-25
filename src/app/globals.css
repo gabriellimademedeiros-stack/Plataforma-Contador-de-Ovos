@@ -87,3 +87,23 @@
     display: none !important;
   }
 }
+
+/* Relatórios (Parte 15.3): A4 paisagem, uma página por bloco */
+.print-report .sheet {
+  width: 297mm;
+  height: 210mm;
+}
+@media print {
+  .print-report .sheet {
+    width: auto;
+    height: auto;
+    break-after: page;
+  }
+  .print-report .sheet:last-child {
+    break-after: auto;
+  }
+  html,
+  body {
+    background: white !important;
+  }
+}

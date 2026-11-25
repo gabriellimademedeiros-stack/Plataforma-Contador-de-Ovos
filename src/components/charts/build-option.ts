@@ -56,7 +56,7 @@ export function buildOption(spec: ChartSpec): EChartsOption {
   const decimals = spec.decimals ?? 1;
   const isTime = spec.xType === "time" || ((spec.kind === "timeseries" || spec.kind === "forecast") && spec.xType !== "category");
   const isAge = spec.kind === "age" || spec.kind === "shelf" || spec.xType === "value";
-  const grid = { left: 8, right: spec.series.some((s) => s.yAxis === 1) ? 8 : 16, top: spec.compact ? 30 : 28, bottom: spec.compact ? 8 : isTime ? 52 : 28, containLabel: true };
+  const grid = { left: 8, right: spec.series.some((s) => s.yAxis === 1) ? 8 : 16, top: spec.compact ? 30 : 28, bottom: spec.compact ? 8 : isTime ? 52 : isAge && spec.xLabel ? 62 : spec.kind === "timeseries" ? 46 : 28, containLabel: true };
 
   // --- Mapa de calor
   if (spec.kind === "heatmap" && spec.heat) {
@@ -291,10 +291,12 @@ export function buildOption(spec: ChartSpec): EChartsOption {
             },
             hideOverlap: true,
           }
-        : undefined,
+        : isAge
+          ? undefined
+          : { interval: 0, hideOverlap: true },
     },
     yAxis: [
-      { type: "value", name: spec.compact ? undefined : (spec.yLabel ?? spec.unit), splitNumber: spec.compact ? 3 : undefined, scale: true, min: spec.yMin, max: spec.yMax, axisLabel: { formatter: (v: number) => nf(decimals > 2 ? 2 : decimals).format(v) } },
+      { type: "value", name: spec.compact ? undefined : (spec.yLabel ?? spec.unit), splitNumber: spec.compact ? 3 : undefined, scale: true, min: spec.yMin, max: spec.yMax, axisLabel: { formatter: (v: number) => nf(Math.min(decimals, 3)).format(v) } },
       ...(hasRight ? [{ type: "value" as const, name: spec.unit2, scale: true, splitLine: { show: false }, axisLabel: { formatter: (v: number) => nf(decimals > 2 ? 2 : decimals).format(v) } }] : []),
     ],
     dataZoom: isTime ? (spec.compact ? [{ type: "inside" }] : [{ type: "inside" }, { type: "slider", height: 14, bottom: 4 }]) : undefined,
@@ -303,7 +305,7 @@ export function buildOption(spec: ChartSpec): EChartsOption {
 }
 
 function legendNames(spec: ChartSpec) {
-  const names = [...(spec.bands ?? []).map((b) => b.name), ...spec.series.map((s) => s.name)];
+  const names = [...(spec.bands ?? []).map((b) => b.name), ...spec.series.filter((s) => !s.muted).map((s) => s.name)];
   if (spec.alerts?.length) names.push("Alertas");
   return Array.from(new Set(names));
 }

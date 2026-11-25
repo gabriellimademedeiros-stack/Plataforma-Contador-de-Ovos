@@ -130,7 +130,7 @@ export async function applyDemoStatesAndWrite(sql: Sql, ds: Dataset, w: AlertsWo
   if (notif.length) await insertBatched(sql, "notifications", notif);
 
   // decisões da reunião da semana passada e anotações nas fichas
-  const prevWeek = addDays(lastCompleteWeekStart(dEnd), 0);
+  const prevWeek = addDays(lastCompleteWeekStart(dEnd), -7);
   await insertBatched(sql, "decisions", [
     { id: uuidFromName("decision:1"), tenant_id: TENANT_ID, week_start: prevWeek, text: "Revisar exaustores e nebulização do P005", owner_name: "Manutenção", due_date: addDays(dEnd, 5), status: "aberta", created_by: userIdFor("diretor@demo.local"), created_at: farmInstant(addDays(prevWeek, 8), 9, 40).toISOString() },
     { id: uuidFromName("decision:2"), tenant_id: TENANT_ID, week_start: prevWeek, text: "Enviar amostra da última carga do grupo A ao laboratório", owner_name: "Gerente", due_date: addDays(dEnd, 2), status: "aberta", created_by: userIdFor("diretor@demo.local"), created_at: farmInstant(addDays(prevWeek, 8), 9, 45).toISOString() },

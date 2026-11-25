@@ -210,9 +210,9 @@ export async function getCulling(scope: Scope, flockCode: string) {
   return { flock: f.code, house: f.houseCode, strain: f.strainName, ageWeek: Math.floor(ageWeeksDecimal(refDate, f.hatchDate)), adjustment: adj, egg, feed: wf?.feed ?? 2, plannedCull: addDays(f.hatchDate, f.plannedCullAgeWeeks * 7), ...r };
 }
 
-export async function getRanking(scope: Scope, phase?: string | null) {
+export async function getRanking(scope: Scope, phase?: string | null, week?: string) {
   const refDate = await getRefDate();
-  const ws = lastCompleteWeekStart(refDate);
+  const ws = week ?? lastCompleteWeekStart(refDate);
   const [flocks, std] = await Promise.all([getFlocks(), getStrainStandards()]);
   const metrics = ["prod.desvio_interno", "mort.diaria", "qual.avarias", "qual.sujos", "nut.conv_dz", ...(scope.canSeeFinance ? ["fin.margem_ave"] : [])];
   const rows = await readWeekly(scope, { metrics, from: ws, to: ws });
