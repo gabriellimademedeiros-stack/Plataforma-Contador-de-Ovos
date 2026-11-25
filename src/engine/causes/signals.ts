@@ -253,7 +253,7 @@ export function computeSignals(ctx: CauseContext, ref: AnomalyRef): Record<Signa
     } else {
       const top = devs.reduce((p, c) => (c.v > p.v ? c : p));
       const early = devs.find((y) => y.x <= addDays(a, 3) && y.v >= 0.7 * top.v);
-      set("ABRUPTO", early ? "presente" : "ausente", early ? `atingiu ${nf((early.v / top.v) * 100, 0)}% do desvio máximo em ${diffDays(a, early.x)} dia(s)` : "o desvio cresceu devagar");
+      set("ABRUPTO", early ? "presente" : "ausente", early ? (diffDays(a, early.x) === 0 ? `atingiu ${nf((early.v / top.v) * 100, 0)}% do desvio máximo já no primeiro dia` : `atingiu ${nf((early.v / top.v) * 100, 0)}% do desvio máximo em ${diffDays(a, early.x)} dia(s)`) : "o desvio cresceu devagar");
       const growing = !early && diffDays(a, top.x) >= 6;
       set("GRADUAL", growing ? "presente" : diffDays(a, d) < 6 && !early ? "nao_verificavel" : "ausente", growing ? `o desvio cresceu por ${diffDays(a, top.x) + 1} dias` : early ? "desvio rápido, não gradual" : "ainda sem 7 dias de desvio");
     }

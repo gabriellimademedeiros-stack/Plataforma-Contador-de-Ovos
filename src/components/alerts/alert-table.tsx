@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { EmptyState } from "@/components/layout/page-header";
 import { SEVERITY_LABEL } from "@/engine/impacts/event-types";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, confidenceLabel } from "@/lib/format";
 import type { AlertListItem } from "@/server/repositories/marks";
 
 export const STATUS_ALERT_LABEL: Record<string, string> = {
@@ -48,7 +48,7 @@ export function AlertTable({ alerts, compact = false }: { alerts: AlertListItem[
               <Badge variant={ST[a.status] ?? "secondary"}>{STATUS_ALERT_LABEL[a.status] ?? a.status}</Badge>
             </TD>
             <TD>{fmtDate(a.openedOn)}</TD>
-            {!compact && <TD className="text-xs">{a.topHypothesis ? `${a.topHypothesis.name} (${a.topHypothesis.confidence})` : "—"}</TD>}
+            {!compact && <TD className="text-xs">{a.topHypothesis ? `${a.topHypothesis.name} (${confidenceLabel(a.topHypothesis.confidence)})` : "—"}</TD>}
           </TR>
         ))}
       </TBody>

@@ -10,7 +10,7 @@ import { HouseHeatmap } from "@/components/kpi/house-heatmap";
 import { PageHeader, Section, EmptyState } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { SEVERITY_LABEL } from "@/engine/impacts/event-types";
-import { fmtDate, fmtDayMonth, fmtInt, fmtNumber, fmtPct, fmtSince } from "@/lib/format";
+import { fmtDate, fmtDayMonth, fmtInt, fmtNumber, fmtPct, fmtSince, confidenceLabel } from "@/lib/format";
 import { houseColor } from "@/lib/colors";
 import { QuestionCard } from "@/components/alerts/question-card";
 
@@ -108,7 +108,7 @@ export default async function HomePage() {
                   </span>
                   {a.topHypothesis && (
                     <span className="w-full text-xs text-muted-foreground md:w-auto">
-                      Hipótese: {a.topHypothesis.name} ({a.topHypothesis.confidence})
+                      Hipótese: {a.topHypothesis.name} ({confidenceLabel(a.topHypothesis.confidence)})
                     </span>
                   )}
                 </li>

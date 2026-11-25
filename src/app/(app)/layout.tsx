@@ -32,7 +32,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <main className="mx-auto w-full max-w-[1600px] p-3 md:p-5">{children}</main>
         </div>
       </div>
-      <AssistantDock canSeeFinance={scope.canSeeFinance} />
+      <Suspense fallback={null}>
+        <AssistantDock
+          canSeeFinance={scope.canSeeFinance}
+          houseCodes={[...scope.houseCodes].sort()}
+          canRegister={scope.canRegister}
+          aiEnabled={Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_MODEL)}
+        />
+      </Suspense>
     </div>
   );
 }

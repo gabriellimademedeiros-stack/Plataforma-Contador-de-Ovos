@@ -140,3 +140,8 @@ export function fmtSince(instant: Date | string | null | undefined, now: Date = 
   if (h < 48) return `há ${h} h`;
   return `há ${Math.round(h / 24)} dias`;
 }
+
+/** Confiança da hipótese em português (alta, média, baixa). */
+export function confidenceLabel(c: string | null | undefined): string {
+  return c === "media" ? "média" : (c ?? "");
+}

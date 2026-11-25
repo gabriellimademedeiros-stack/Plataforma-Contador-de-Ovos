@@ -20,7 +20,7 @@
     "demo:backtest": "tsx scripts/backtest.ts",
     "demo:advance-day": "tsx scripts/advance-day.ts",
     "demo:states": "tsx scripts/apply-demo-states.ts",
-    "eval:assistant": "tsx scripts/eval-assistant.ts",
+    "eval:assistant": "tsx --conditions=react-server scripts/eval-assistant.ts",
     "test:e2e": "playwright test --trace off"
   },
   "dependencies": {
