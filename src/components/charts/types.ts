@@ -19,6 +19,8 @@ export interface SeriesSpec {
   symbol?: boolean;
   smooth?: boolean;
   step?: boolean;
+  /** cor por ponto (barras) */
+  colors?: Array<string | null>;
   /** Série cinza de fundo (lotes anteriores) */
   muted?: boolean;
 }

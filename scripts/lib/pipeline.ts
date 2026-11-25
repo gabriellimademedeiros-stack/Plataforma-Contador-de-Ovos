@@ -6,6 +6,7 @@ import { eventRows, writeDataset } from "../../src/server/repositories/dataset-w
 import type { Dataset } from "../../src/engine/types";
 import { copyRows, insertBatched } from "./db-write";
 import { computeAndWriteMetrics } from "./metrics-step";
+import { computeAndWriteImpacts } from "./impacts-step";
 import type { MetricsResult } from "../../src/engine/metrics/pipeline";
 
 export interface PipelineCtx {
@@ -42,6 +43,8 @@ export async function runPipelineAfterBase(ctx: PipelineCtx): Promise<PipelineSt
   });
 
   const metrics = await step("6. Indicadores diários, semanais, da granja e padrões internos", () => computeAndWriteMetrics(sql, ds));
+
+  await step("7. Retratos de impacto dos eventos", () => computeAndWriteImpacts(sql, ds, metrics));
 
   await ins("system_state", [
     { key: "simulation", value: { seed: cal.seed, dStart: cal.dStart, anchorEnd: cal.dEnd, lastDay: ds.dEnd } },

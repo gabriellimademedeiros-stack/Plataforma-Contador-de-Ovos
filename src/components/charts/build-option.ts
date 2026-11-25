@@ -171,7 +171,7 @@ export function buildOption(spec: ChartSpec): EChartsOption {
   // --- Barras (verticais ou horizontais)
   if (spec.kind === "bar" || spec.kind === "hbar") {
     const cats = spec.categories ?? Array.from(new Set(spec.series.flatMap((s) => s.data.map((d) => String(d[0])))));
-    const catAxis = { type: "category" as const, data: cats, axisLabel: { interval: 0, width: 90, overflow: "break" as const }, inverse: spec.kind === "hbar" };
+    const catAxis = { type: "category" as const, data: cats, axisLabel: { interval: 0, width: 90, overflow: "break" as const, rotate: spec.kind === "bar" && cats.length > 8 ? 35 : 0 }, inverse: spec.kind === "hbar" };
     const valAxis = { type: "value" as const, name: spec.unit, axisLabel: { formatter: (v: number) => nf(decimals).format(v) } };
     return {
       grid: { ...grid, bottom: spec.series.length > 1 ? 40 : 24 },
@@ -182,9 +182,9 @@ export function buildOption(spec: ChartSpec): EChartsOption {
       series: spec.series.map((s) => ({
         ...baseSeries({ ...s, type: s.type ?? "bar" }, spec),
         data: cats.map((c) => {
-          const d = s.data.find((x) => String(x[0]) === c);
-          const v = d?.[1] ?? null;
-          const custom = (d as unknown as { color?: string; href?: string })?.color;
+          const di = s.data.findIndex((x) => String(x[0]) === c);
+          const v = di >= 0 ? s.data[di][1] : null;
+          const custom = di >= 0 ? s.colors?.[di] : null;
           return { value: v, itemStyle: custom ? { color: custom } : undefined };
         }),
         label: spec.series.length === 1 ? { show: cats.length <= 16, position: spec.kind === "hbar" ? "right" : "top", formatter: (p: unknown) => fmtY((p as { value: number }).value, decimals) } : undefined,
