@@ -1,0 +1,5 @@
+node_modules
+.next
+docs/SPEC_BETA.md
+src/db/migrations
+package-lock.json

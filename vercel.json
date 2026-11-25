@@ -1,0 +1,4 @@
+{
+  "regions": ["gru1"],
+  "crons": [{ "path": "/api/cron/avancar-dia", "schedule": "5 9 * * *" }]
+}
