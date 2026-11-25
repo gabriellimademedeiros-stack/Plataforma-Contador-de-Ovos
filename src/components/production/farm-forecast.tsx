@@ -1,7 +1,8 @@
-import { EmptyState } from "@/components/layout/page-header";
 import type { Scope } from "@/server/permissions";
+import { getForecast } from "@/server/services/finance";
+import { ForecastView } from "./forecast-view";
 
-/** Previsão de 8 semanas por galpão e total (marco M9). */
-export async function FarmForecast(_p: { scope: Scope }) {
-  return <EmptyState title="Previsão de produção">Disponível no marco M9.</EmptyState>;
+/** Previsão de 8 semanas por galpão e total (Parte 12.7). */
+export async function FarmForecast({ scope }: { scope: Scope }) {
+  return <ForecastView f={await getForecast(scope, 8)} />;
 }

@@ -6,6 +6,8 @@ import { alertCandidates, eventCandidates } from "../../src/engine/causes/candid
 import type { CauseContext } from "../../src/engine/causes/signals";
 import { minDate } from "../../src/lib/dates";
 import { demoStateFor } from "../../src/simulator/demo-states";
+import { marginBridge, type WeekFinance } from "../../src/engine/finance/bridge";
+import { addDays as add } from "../../src/lib/dates";
 import type { AlertsWorld } from "./alerts-step";
 
 export function causeContextFrom(ds: Dataset, m: MetricsResult): CauseContext {
@@ -54,6 +56,29 @@ export async function computeAlertInsights(ds: Dataset, m: MetricsResult, w: Ale
       fingerprint: now.fingerprint,
     });
     n++;
+  }
+  // A22: ponte de margem no lugar das hipóteses (Parte 12.5)
+  const wk = (house: string, ws: string): WeekFinance | null => {
+    const g = (metric: string) => m.weekly.find((r) => r.house === house && r.key === ws && r.metric === metric);
+    const mg = g("fin.margem");
+    const eggs = g("prod.ovos");
+    const feed = g("nut.racao");
+    const price = ds.prices.find((p) => p.weekStart === ws);
+    if (!mg || mg.value == null || !eggs?.value || !feed?.num || !price) return null;
+    return { weekStart: ws, margin: mg.value, dozens: eggs.value / 12, eggPrice: price.ovo_comercial_dz, feedKg: feed.num / 1000, feedPrice: price.racao_kg };
+  };
+  for (const a of w.alerts.filter((x) => x.rule === "A22" && x.house)) {
+    const cur = wk(a.house!, add(a.openedOn, -7));
+    if (!cur) continue;
+    let ref: WeekFinance | null = null;
+    for (let k = 1; k <= 8 && !ref; k++) {
+      const x = wk(a.house!, add(cur.weekStart, -7 * k));
+      if (x && x.margin >= 0) ref = x;
+    }
+    ref = ref ?? wk(a.house!, add(cur.weekStart, -56));
+    if (!ref) continue;
+    const b = marginBridge(ref, cur);
+    w.hypotheses.set(a.id, { hypotheses: [], decomposition: b, similar: [], atOpening: [], whatToKnow: [], text: b.sentence });
   }
   console.log(`\n    ${n} alertas analisados · ${candidates.length} casos candidatos (eventos confirmados e alertas resolvidos)`);
 }

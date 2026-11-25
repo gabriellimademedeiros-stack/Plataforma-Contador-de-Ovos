@@ -2,6 +2,7 @@ import type postgres from "postgres";
 import type { DB } from "../../src/db/client";
 import type { SimCalendar } from "../../src/simulator/calendar";
 import { generateDataset } from "../../src/simulator/generate";
+import { calibrateFinance } from "../../src/simulator/calibrate";
 import { eventRows, writeDataset } from "../../src/server/repositories/dataset-writer";
 import type { Dataset } from "../../src/engine/types";
 import { copyRows, insertBatched } from "./db-write";
@@ -29,7 +30,10 @@ export async function runPipelineAfterBase(ctx: PipelineCtx): Promise<PipelineSt
   const ins = (t: string, rows: Record<string, unknown>[]) => insertBatched(sql, t, rows);
 
   const ds = await step("4. Simulação (3 anos em memória) e gravação dos dados brutos", async () => {
-    const d = generateDataset({ seed: cal.seed, dEnd: cal.dEnd, dStart: cal.dStart });
+    const calib = calibrateFinance(cal.seed, cal.dEnd);
+    console.log(`\n    calibração (Parte 7.10): ${calib.ok ? "ok" : "PARCIAL"} · ovo nas 6 últimas semanas R$ ${calib.calibEgg.map((v) => v.toFixed(2).replace(".", ",")).join(" · ")} · ajuste do L107 ${calib.l107} p.p.`);
+    (ctx as unknown as { calib: typeof calib }).calib = calib;
+    const d = generateDataset({ seed: cal.seed, dEnd: cal.dEnd, dStart: cal.dStart, calibEgg: calib.calibEgg, qualityOffset: { L107: calib.l107 } });
     const counts = await writeDataset(sql, d, bulk, ins, { includeEvents: false });
     console.log("\n   ", Object.entries(counts).map(([k, v]) => `${k}=${v}`).join(" "));
     return d;
@@ -55,7 +59,7 @@ export async function runPipelineAfterBase(ctx: PipelineCtx): Promise<PipelineSt
   await step("10. Estados de demonstração", () => applyDemoStatesAndWrite(sql, ds, aw));
 
   await ins("system_state", [
-    { key: "simulation", value: { seed: cal.seed, dStart: cal.dStart, anchorEnd: cal.dEnd, lastDay: ds.dEnd } },
+    { key: "simulation", value: { seed: cal.seed, dStart: cal.dStart, anchorEnd: cal.dEnd, lastDay: ds.dEnd, calibEgg: (ctx as unknown as { calib: { calibEgg: number[] } }).calib.calibEgg, l107: (ctx as unknown as { calib: { l107: number } }).calib.l107 } },
   ]);
   const table = detectionTable(aw);
   console.log("\n12. Cenário → detectado?");

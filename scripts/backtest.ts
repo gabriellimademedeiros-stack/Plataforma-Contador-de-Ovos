@@ -1,13 +1,15 @@
 import "./env";
 import { resolveCalendar } from "../src/simulator/calendar";
 import { generateDataset } from "../src/simulator/generate";
+import { calibrateFinance } from "../src/simulator/calibrate";
 import { computeAllMetrics } from "../src/engine/metrics/pipeline";
 import { detectionTable, runBacktest } from "./lib/alerts-step";
 
 /** demo:backtest — roda o motor de alertas em memória sobre todo o histórico e imprime a tabela de detecção. */
 const cal = resolveCalendar();
 const t0 = Date.now();
-const ds = generateDataset({ seed: cal.seed, dEnd: cal.dEnd, skipHourly: true });
+const calib = calibrateFinance(cal.seed, cal.dEnd);
+const ds = generateDataset({ seed: cal.seed, dEnd: cal.dEnd, skipHourly: true, calibEgg: calib.calibEgg, qualityOffset: { L107: calib.l107 } });
 const m = computeAllMetrics(ds);
 const w = runBacktest(ds, m);
 const months = 35;

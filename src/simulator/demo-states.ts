@@ -106,7 +106,7 @@ export function demoStateFor(a: EngineAlert, scenarios: ScenarioInfo[], dEnd: st
       return resolved(a.conditionClearedOn ?? addDays(a.openedOn, 3), GERENTE, h.cause, h.action);
     }
   }
-  if (a.rule === "A22" && a.house === "P007") return base;
+  if (a.rule === "A22" && a.house === "P007" && a.openedOn >= d(-21)) return base;
   if (a.openedOn > d(-7)) return base; // ruído recente: aberto
   if (a.rule === "A11") return resolved(a.conditionClearedOn ?? addDays(a.openedOn, 2), GERENTE, bestHeatCause(a), null, "calor do período");
   return { ...base, status: "descartado", closedOn: a.conditionClearedOn ?? addDays(a.openedOn, 3), ackBy: GERENTE, ackOn: a.openedOn, resolvedBy: GERENTE, discardReason: "variação normal", wasUseful: false };
