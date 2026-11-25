@@ -1,0 +1,21 @@
+/** Códigos das hipóteses da base de conhecimento (Parte 11.3). */
+export const HYPOTHESIS_CODES = [
+  "estresse_termico",
+  "resfriamento_insuficiente",
+  "doenca_infecciosa",
+  "falha_agua",
+  "problema_racao",
+  "falha_distribuicao_racao",
+  "nutricional_casca",
+  "idade_lote",
+  "equipamento_esteira",
+  "ovos_grandes_prolapso",
+  "bicagem",
+  "acaro_vermelho",
+  "enterite",
+  "excesso_sodio",
+  "vazamento_bebedouro",
+  "falha_energia_ventilacao",
+  "programa_luz",
+  "estresse_manejo",
+] as const;

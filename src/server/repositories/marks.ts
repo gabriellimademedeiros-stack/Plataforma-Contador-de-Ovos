@@ -66,7 +66,7 @@ export function eventMarks(events: EventListItem[], axis: "data" | "idade" = "da
     .map((e) => {
       const from = axis === "idade" && ageOf ? ageOf(e.startDate) : e.startDate;
       const to = e.endDate && e.endDate !== e.startDate ? (axis === "idade" && ageOf ? ageOf(e.endDate) : e.endDate) : null;
-      return { id: e.id, label: e.title, category: e.category, from: from ?? e.startDate, to };
+      return { id: e.id, label: e.title.length > 34 ? `${e.title.slice(0, 32)}…` : e.title, category: e.category, from: from ?? e.startDate, to };
     });
 }
 

@@ -179,7 +179,7 @@ export const DAILY = {
   eggWeightSd: 0.3,
   mortHeatCoef: 0.15,
   cullsLambda: 0.5,
-  feedHeatCoef: 0.02,
+  feedHeatCoef: 0.025,
   feedSd: 0.015,
   waterPerFeed: 1.9,
   waterHeatCoef: 0.025,

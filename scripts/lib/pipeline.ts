@@ -7,6 +7,7 @@ import type { Dataset } from "../../src/engine/types";
 import { copyRows, insertBatched } from "./db-write";
 import { computeAndWriteMetrics } from "./metrics-step";
 import { computeAndWriteImpacts } from "./impacts-step";
+import { applyDemoStatesAndWrite, detectionTable, runBacktest } from "./alerts-step";
 import type { MetricsResult } from "../../src/engine/metrics/pipeline";
 
 export interface PipelineCtx {
@@ -46,8 +47,25 @@ export async function runPipelineAfterBase(ctx: PipelineCtx): Promise<PipelineSt
 
   await step("7. Retratos de impacto dos eventos", () => computeAndWriteImpacts(sql, ds, metrics));
 
+  const aw = await step("8. Backtest do motor de alertas (dia a dia, sem olhar o futuro) e incidentes", async () => runBacktest(ds, metrics));
+  await step("9. Hipóteses, decomposição e casos parecidos", async () => {
+    const { computeAlertInsights } = await import("./insights-step");
+    await computeAlertInsights(ds, metrics, aw);
+  });
+  await step("10. Estados de demonstração", () => applyDemoStatesAndWrite(sql, ds, aw));
+
   await ins("system_state", [
     { key: "simulation", value: { seed: cal.seed, dStart: cal.dStart, anchorEnd: cal.dEnd, lastDay: ds.dEnd } },
   ]);
+  const table = detectionTable(aw);
+  console.log("\n12. Cenário → detectado?");
+  for (const r of table) console.log(`    ${r.ok ? "✓" : "✗"} ${r.code.padEnd(3)} ${r.name.padEnd(44)} ${r.result}${r.rules ? ` (${r.rules})` : ""}`);
+  const tables = ["daily_records", "egg_counts", "sensor_readings", "daily_metrics", "weekly_metrics", "events", "event_impacts", "alerts", "incidents", "report_runs"];
+  const counts: string[] = [];
+  for (const t of tables) {
+    const [{ n }] = await sql.unsafe(`select count(*)::int as n from app.${t}`);
+    counts.push(`${t}=${n}`);
+  }
+  console.log("    Linhas por tabela:", counts.join(" "));
   return { ds, metrics };
 }

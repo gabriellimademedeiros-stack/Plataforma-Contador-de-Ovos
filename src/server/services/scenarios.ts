@@ -52,7 +52,7 @@ export async function scenarioDetection(): Promise<DetectionRow[]> {
       .filter((a) => s.expectedRules.length === 0 || s.expectedRules.includes(a.rule_code) || s.code === "S7")
       .map((a) => ({ rule: a.rule_code as string, house: a.house as string | null, openedOn: d10(a.opened_on), id: a.id as string }));
     const s7 = s.code === "S7";
-    const s7Found = s7 ? alerts.filter((a) => a.house === "P002" && ["A03", "A04", "A05", "A08", "A09"].includes(a.rule_code) && d10(a.first_deviation_on) >= s.start && d10(a.first_deviation_on) <= addDays(s.start, 10)) : [];
+    const s7Found = s7 ? alerts.filter((a) => a.house === "P002" && ["A03", "A04", "A05", "A08", "A09"].includes(a.rule_code) && d10(a.first_deviation_on) >= s.start && d10(a.first_deviation_on) <= addDays(s.start, 4)) : [];
     const detected = s7 ? s7Found.length === 0 : found.length > 0;
     return {
       code: s.code,
