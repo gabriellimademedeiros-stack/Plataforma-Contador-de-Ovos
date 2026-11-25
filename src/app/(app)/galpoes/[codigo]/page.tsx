@@ -45,6 +45,16 @@ export default async function HousePage({ params, searchParams }: { params: Prom
   const { codigo } = await params;
   const sp = await searchParams;
   const scope = await getScope();
+  if (/^P\d{3}$/i.test(codigo) && !scope.houseCodes.has(codigo.toUpperCase()))
+    return (
+      <div className="mx-auto max-w-lg space-y-3 rounded-xl border bg-white p-6 text-center">
+        <h1 className="text-lg font-semibold">Galpão {codigo.toUpperCase()}</h1>
+        <p className="text-sm text-slate-600">Seu perfil não tem acesso a este galpão. Galpões que você pode ver: {[...scope.houseCodes].sort().join(", ")}.</p>
+        <Link href="/granja" className="inline-block rounded-md bg-emerald-700 px-4 py-2 text-sm text-white">
+          Ver a granja
+        </Link>
+      </div>
+    );
   const ctx = await getHouseContext(scope, codigo);
   const header = await getHouseHeader(ctx);
   const tabs = [

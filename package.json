@@ -18,7 +18,7 @@
     "demo:simulate": "tsx scripts/simulate.ts",
     "demo:compute": "tsx scripts/compute.ts",
     "demo:backtest": "tsx scripts/backtest.ts",
-    "demo:advance-day": "tsx scripts/advance-day.ts",
+    "demo:advance-day": "tsx --conditions=react-server scripts/advance-day.ts",
     "demo:states": "tsx scripts/apply-demo-states.ts",
     "eval:assistant": "tsx --conditions=react-server scripts/eval-assistant.ts",
     "test:e2e": "playwright test --trace off"

@@ -8,6 +8,7 @@ import type { TargetDef } from "@/engine/standards/targets";
 import { getTargets } from "@/server/repositories/config";
 import { KNOWLEDGE_BASE } from "@/engine/causes/knowledge-base";
 import { RANK_COMPONENTS } from "@/engine/ranking/houses";
+import { CERTAINTY_LABEL } from "@/engine/impacts/event-types";
 import { whatChanged } from "@/engine/text/report";
 import type { Scope } from "@/server/permissions";
 import { listAlerts, listEvents } from "@/server/repositories/marks";
@@ -385,7 +386,7 @@ export async function buildWeeklyReport(scope: Scope, ws: string, scopeNote: str
         title: `Eventos da semana (${events.length})`,
         columns: ["Data", "Galpões", "Evento", "Certeza", "Retrato resumido"],
         align: ["l", "l", "l", "l", "l"],
-        rows: events.slice(0, 7).map((e) => [c(dm(e.startDate)), c(e.houses.length > 3 ? `${e.houses.length} galpões` : e.houses.join(", ")), c(e.title), c(e.certainty), c(((e.details?.impact_summary as string) ?? "retrato em cálculo (janela aberta)").slice(0, 140))]),
+        rows: events.slice(0, 7).map((e) => [c(dm(e.startDate)), c(e.houses.length > 3 ? `${e.houses.length} galpões` : e.houses.join(", ")), c(e.title), c(CERTAINTY_LABEL[e.certainty as keyof typeof CERTAINTY_LABEL] ?? e.certainty), c(((e.details?.impact_summary as string) ?? "retrato em cálculo (janela aberta)").slice(0, 140))]),
         empty: "Nenhum evento registrado na semana.",
       },
       {

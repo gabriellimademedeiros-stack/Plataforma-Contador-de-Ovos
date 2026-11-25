@@ -26,7 +26,8 @@ export function QuestionCard({ q, big = false }: { q: QuestionData; big?: boolea
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d.error ?? "Não foi possível registrar a resposta.");
       setDone(label);
-      router.refresh();
+      // dá tempo de ler a confirmação antes de a pergunta sair da lista de pendentes
+      setTimeout(() => router.refresh(), 5000);
     } catch (e) {
       setError((e as Error).message);
     } finally {
