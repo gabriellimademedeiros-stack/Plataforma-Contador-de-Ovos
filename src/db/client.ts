@@ -11,17 +11,20 @@ declare global {
 }
 
 /**
- * Cliente do app (Next.js / Vercel). Usa o Transaction pooler: prepare=false e poucas conexões.
+ * Cliente do app (Next.js / Vercel). Usa o Session pooler do Supabase (DIRECT_URL, porta 5432) quando existir:
+ * no Transaction pooler (porta 6543) as consultas com parâmetros ficavam paradas (ver DECISOES). Poucas conexões
+ * e encerramento rápido das ociosas, para caber no limite do plano gratuito.
  */
 export function getDb(): DB {
   if (!globalThis.__ovosDb) {
-    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL não configurada (veja .env.example).");
-    const url = dbUrlFrom("DATABASE_URL", process.env.DATABASE_URL);
+    const raw = process.env.DIRECT_URL || process.env.DATABASE_URL;
+    if (!raw) throw new Error("DATABASE_URL não configurada (veja .env.example).");
+    const url = dbUrlFrom(process.env.DIRECT_URL ? "DIRECT_URL" : "DATABASE_URL", raw);
     const isProd = process.env.NODE_ENV === "production";
     const sql = postgres(url, {
       prepare: false,
-      max: isProd ? 1 : 5,
-      idle_timeout: 20,
+      max: isProd ? 2 : 5,
+      idle_timeout: isProd ? 10 : 20,
       connect_timeout: 15,
       onnotice: () => {},
     });
