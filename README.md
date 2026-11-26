@@ -132,7 +132,7 @@ Curvas das linhagens, padrões de produção e mortalidade, clima, preços do ov
 
 ## 10. Publicação e custos da beta
 
-- **Supabase** (plano gratuito; o projeto publicado ficou em `us-east-2`, Ohio): banco Postgres. O app usa o Session pooler (`DIRECT_URL`). Projetos gratuitos podem **pausar após dias sem acesso**; o cron diário mantém o banco ativo. Se pausar, entre no painel do Supabase, abra o projeto e clique em **Restore/Resume**; depois rode `npm run demo:advance-day` ou aguarde o cron.
+- **Supabase** (plano gratuito; o projeto publicado ficou em `us-east-2`, Ohio): banco Postgres. O app usa o Transaction pooler (`DATABASE_URL`, porta 6543, uma consulta por vez em cada conexão); os scripts usam o Session pooler (`DIRECT_URL`). Diagnóstico das conexões: `/api/saude/conexoes`. Projetos gratuitos podem **pausar após dias sem acesso**; o cron diário mantém o banco ativo. Se pausar, entre no painel do Supabase, abra o projeto e clique em **Restore/Resume**; depois rode `npm run demo:advance-day` ou aguarde o cron.
 - **Vercel** (plano gratuito/Hobby, funções na região `cle1`, ao lado do banco): hospeda as telas e as APIs; cron diário `5 9 * * *` (06:05 em Fortaleza) chamando `/api/cron/avancar-dia` com `Authorization: Bearer CRON_SECRET`. Cabeçalho `X-Robots-Tag: noindex`, metadados `noindex` e `robots.txt` bloqueando buscadores.
 - **Anthropic** (opcional): o assistente consome créditos por uso; o limite diário por usuário (`ASSISTANT_DAILY_LIMIT`, padrão 60) protege o custo. Sem chave, a beta funciona no modo de demonstração sem IA.
 

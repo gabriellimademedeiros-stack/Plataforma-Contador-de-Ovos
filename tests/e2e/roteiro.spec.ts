@@ -104,6 +104,6 @@ test("roteiro da demonstração, passos 1 a 11", async ({ page, browser }) => {
   await expect(page.getByText("Hoje (parcial, ao vivo)")).toBeVisible();
 
   // limpeza
-  const r = await page.request.post("/api/demo/limpar");
-  expect(r.ok()).toBe(true);
+  const ok = await page.evaluate(() => fetch("/api/demo/limpar", { method: "POST" }).then((r) => r.ok));
+  expect(ok).toBe(true);
 });

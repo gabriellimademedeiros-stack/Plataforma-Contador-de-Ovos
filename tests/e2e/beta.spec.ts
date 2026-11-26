@@ -71,8 +71,8 @@ test("encarregado: só P001 a P004 e nada financeiro", async ({ page }) => {
     const res = await page.goto(r, { waitUntil: "networkidle" });
     expect(res?.status(), r).toBeLessThan(400);
   }
-  const fin = await page.request.get("/api/metricas?metrica=fin.margem");
-  expect(fin.status()).toBe(403);
+  const fin = await page.evaluate(() => fetch("/api/metricas?metrica=fin.margem").then((r) => r.status));
+  expect(fin).toBe(403);
   expect(errors, errors.join("\n")).toEqual([]);
 });
 
@@ -113,6 +113,6 @@ test("campo no celular: registra mortalidade e mostra Registrado ✓", async ({ 
   await page.getByRole("button", { name: "Registrar" }).click();
   await expect(page.getByText(/Registrado ✓/)).toBeVisible();
   // limpa o apontamento de teste
-  await page.request.post("/api/demo/limpar").catch(() => null);
+  await page.evaluate(() => fetch("/api/demo/limpar", { method: "POST" })).catch(() => null);
   await ctx.close();
 });
