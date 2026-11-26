@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySession } from "@/server/auth/jwt";
 
-const PUBLIC = [/^\/login$/, /^\/api\/auth\/login$/, /^\/api\/ingest\//, /^\/api\/cron\//, /^\/api\/saude$/];
+const PUBLIC = [/^\/login$/, /^\/api\/auth\/login$/, /^\/api\/ingest\//, /^\/api\/cron\//, /^\/api\/saude(\/conexoes)?$/];
 
 /** Redireciona telas sem sessão para /login e devolve 401 em JSON para APIs (Parte 17.2). */
 export async function proxy(req: NextRequest) {
