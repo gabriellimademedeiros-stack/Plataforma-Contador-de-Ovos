@@ -12,7 +12,7 @@ jobs:
   reset:
     if: ${{ github.event.inputs.confirmar == 'RESET' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       DIRECT_URL: ${{ secrets.DIRECT_URL }}
@@ -31,4 +31,7 @@ jobs:
       - name: Criar as tabelas
         run: npm run db:migrate
       - name: Gerar os dados da demonstração
+        timeout-minutes: 15
         run: npm run demo:reset
+      - name: Avanço diário (gera os dias que faltarem até ontem)
+        run: npm run demo:advance-day

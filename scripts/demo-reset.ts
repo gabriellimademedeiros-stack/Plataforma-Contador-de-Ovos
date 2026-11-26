@@ -8,9 +8,9 @@ import { runPipelineAfterBase } from "./lib/pipeline";
 
 async function step<T>(name: string, fn: () => Promise<T>): Promise<T> {
   const t0 = Date.now();
-  process.stdout.write(`▶ ${name}… `);
+  console.log(`▶ ${name}…`);
   const r = await fn();
-  console.log(`ok (${((Date.now() - t0) / 1000).toFixed(1)} s)`);
+  console.log(`  ok (${((Date.now() - t0) / 1000).toFixed(1)} s)`);
   return r;
 }
 
@@ -32,6 +32,8 @@ async function main() {
     await runPipelineAfterBase({ sql, db, cal, step });
   } finally {
     await sql.end();
+    // conexão usada pelos serviços do app (relatórios)
+    await globalThis.__ovosSql?.end({ timeout: 2 });
   }
   console.log(`\n✓ Reset completo em ${((Date.now() - t0) / 1000 / 60).toFixed(1)} min`);
 }

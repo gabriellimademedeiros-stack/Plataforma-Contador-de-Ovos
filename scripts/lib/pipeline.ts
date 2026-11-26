@@ -61,10 +61,20 @@ export async function runPipelineAfterBase(ctx: PipelineCtx): Promise<PipelineSt
   await ins("system_state", [
     { key: "simulation", value: { seed: cal.seed, dStart: cal.dStart, anchorEnd: cal.dEnd, lastDay: ds.dEnd, calibEgg: (ctx as unknown as { calib: { calibEgg: number[] } }).calib.calibEgg, l107: (ctx as unknown as { calib: { l107: number } }).calib.l107 } },
   ]);
-  await step("11. Relatórios Semanal e Comparativo das últimas 4 semanas (arquivados em report_runs)", async () => {
-    const { generateReportsForWeeks } = await import("./reports-step");
-    await generateReportsForWeeks(sql, ds.dEnd, 4);
-  });
+  try {
+    await step("11. Relatórios Semanal e Comparativo das últimas 4 semanas (arquivados em report_runs)", async () => {
+      const { generateReportsForWeeks } = await import("./reports-step");
+      // trava de tempo: os relatórios também podem ser gerados depois pelo botão "Gerar agora" em /relatorios
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([generateReportsForWeeks(sql, ds.dEnd, 4), new Promise((_, rej) => (timer = setTimeout(() => rej(new Error("tempo esgotado (3 min)")), 180_000)))]);
+      } finally {
+        clearTimeout(timer);
+      }
+    });
+  } catch (e) {
+    console.log(`\n    ! relatórios não arquivados (${(e as Error).message}); gere depois em Relatórios → "Gerar agora".`);
+  }
   const table = detectionTable(aw);
   console.log("\n12. Cenário → detectado?");
   for (const r of table) console.log(`    ${r.ok ? "✓" : "✗"} ${r.code.padEnd(3)} ${r.name.padEnd(44)} ${r.result}${r.rules ? ` (${r.rules})` : ""}`);

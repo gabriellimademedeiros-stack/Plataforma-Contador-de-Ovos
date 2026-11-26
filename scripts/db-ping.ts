@@ -4,7 +4,8 @@ import { normalizeDbUrl } from "../src/db/url";
 
 /** Testa a conexão e explica, sem mostrar a senha, o que há de errado com as strings coladas. */
 async function check(name: "DIRECT_URL" | "DATABASE_URL"): Promise<boolean> {
-  const raw = process.env[name];
+  // env.ts troca DATABASE_URL pela DIRECT_URL nos scripts; aqui testamos a original, que é a usada pela Vercel
+  const raw = name === "DATABASE_URL" ? (process.env.DATABASE_URL_APP ?? process.env.DATABASE_URL) : process.env[name];
   if (!raw) {
     console.log(`– ${name}: não configurada`);
     return name === "DATABASE_URL" ? false : true;

@@ -11,6 +11,9 @@ export async function generateReportsForWeeks(sql: Sql, dEnd: string, weeks: num
   const last = lastCompleteWeekStart(dEnd);
   for (let k = weeks - 1; k >= 0; k--) {
     const ws = addDays(last, -7 * k);
-    for (const kind of ["semanal", "comparativo"] as const) await generateRun(kind, ws);
+    for (const kind of ["semanal", "comparativo"] as const) {
+      await generateRun(kind, ws);
+      console.log(`    relatório ${kind} da semana ${ws} arquivado`);
+    }
   }
 }
