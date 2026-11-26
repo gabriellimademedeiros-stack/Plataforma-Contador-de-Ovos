@@ -19,7 +19,7 @@
 
 ## 2. Link e contas de demonstração
 
-- **Link:** definido na publicação na Vercel (veja a seção 10). Localmente: <http://localhost:3000>.
+- **Link:** <https://plataforma-contador-de-ovos.vercel.app> · diagnóstico do banco: <https://plataforma-contador-de-ovos.vercel.app/api/saude>. Localmente: <http://localhost:3000>.
 - **Senha única das três contas:** a variável `DEMO_PASSWORD` (informada em mãos; não fica no repositório).
 
 | Conta | Perfil | O que vê |
@@ -132,11 +132,11 @@ Curvas das linhagens, padrões de produção e mortalidade, clima, preços do ov
 
 ## 10. Publicação e custos da beta
 
-- **Supabase** (plano gratuito, região São Paulo): banco Postgres. Projetos gratuitos podem **pausar após dias sem acesso**; o cron diário mantém o banco ativo. Se pausar, entre no painel do Supabase, abra o projeto e clique em **Restore/Resume**; depois rode `npm run demo:advance-day` ou aguarde o cron.
-- **Vercel** (plano gratuito/Hobby, região `gru1`): hospeda as telas e as APIs; cron diário `5 9 * * *` (06:05 em Fortaleza) chamando `/api/cron/avancar-dia` com `Authorization: Bearer CRON_SECRET`. Cabeçalho `X-Robots-Tag: noindex`, metadados `noindex` e `robots.txt` bloqueando buscadores.
+- **Supabase** (plano gratuito; o projeto publicado ficou em `us-east-2`, Ohio): banco Postgres. O app usa o Session pooler (`DIRECT_URL`). Projetos gratuitos podem **pausar após dias sem acesso**; o cron diário mantém o banco ativo. Se pausar, entre no painel do Supabase, abra o projeto e clique em **Restore/Resume**; depois rode `npm run demo:advance-day` ou aguarde o cron.
+- **Vercel** (plano gratuito/Hobby, funções na região `cle1`, ao lado do banco): hospeda as telas e as APIs; cron diário `5 9 * * *` (06:05 em Fortaleza) chamando `/api/cron/avancar-dia` com `Authorization: Bearer CRON_SECRET`. Cabeçalho `X-Robots-Tag: noindex`, metadados `noindex` e `robots.txt` bloqueando buscadores.
 - **Anthropic** (opcional): o assistente consome créditos por uso; o limite diário por usuário (`ASSISTANT_DAILY_LIMIT`, padrão 60) protege o custo. Sem chave, a beta funciona no modo de demonstração sem IA.
 
-Na Vercel, cadastre as mesmas variáveis do `.env.example` (com `DATABASE_URL` apontando para o Transaction pooler) e dispare o cron uma vez em **Settings → Cron Jobs → Run** para testar.
+Na Vercel, cadastre as mesmas variáveis do `.env.example` e dispare o cron uma vez em **Settings → Cron Jobs → Run** para testar. Para carregar ou recriar os dados no banco publicado, use no GitHub **Actions → Reset da demonstração (Supabase) → Run workflow** (digite RESET).
 
 ## 11. Ligação com o produto completo e próximos passos sugeridos
 
