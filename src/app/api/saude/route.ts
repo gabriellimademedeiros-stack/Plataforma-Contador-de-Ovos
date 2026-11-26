@@ -7,8 +7,8 @@ export const maxDuration = 30;
 
 /** Diagnóstico público e sem segredos: o app consegue consultar o banco? Qual conexão está em uso? */
 export async function GET() {
-  const which = process.env.DIRECT_URL ? "DIRECT_URL" : "DATABASE_URL";
-  const c = normalizeDbUrl(process.env.DIRECT_URL || process.env.DATABASE_URL);
+  const which = process.env.DATABASE_URL ? "DATABASE_URL" : "DIRECT_URL";
+  const c = normalizeDbUrl(process.env.DATABASE_URL || process.env.DIRECT_URL);
   const t0 = Date.now();
   try {
     const sql = getSql();
