@@ -1,5 +1,6 @@
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { dbUrlFrom } from "./url";
 import * as schema from "./schema";
 
 export type DB = PostgresJsDatabase<typeof schema>;
@@ -14,8 +15,8 @@ declare global {
  */
 export function getDb(): DB {
   if (!globalThis.__ovosDb) {
-    const url = process.env.DATABASE_URL;
-    if (!url) throw new Error("DATABASE_URL não configurada (veja .env.example).");
+    if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL não configurada (veja .env.example).");
+    const url = dbUrlFrom("DATABASE_URL", process.env.DATABASE_URL);
     const isProd = process.env.NODE_ENV === "production";
     const sql = postgres(url, {
       prepare: false,
@@ -37,8 +38,9 @@ export function getSql() {
 
 /** Cliente dos scripts locais (Session pooler / conexão direta). */
 export function createScriptDb(max = 5) {
-  const url = process.env.DIRECT_URL || process.env.DATABASE_URL;
-  if (!url) throw new Error("DIRECT_URL não configurada (veja .env.example).");
+  const raw = process.env.DIRECT_URL || process.env.DATABASE_URL;
+  if (!raw) throw new Error("DIRECT_URL não configurada (veja .env.example).");
+  const url = dbUrlFrom(process.env.DIRECT_URL ? "DIRECT_URL" : "DATABASE_URL", raw);
   const sql = postgres(url, { prepare: false, max, onnotice: () => {}, connect_timeout: 20 });
   return { sql, db: drizzle(sql, { schema }) as DB };
 }
